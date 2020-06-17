@@ -4,10 +4,11 @@ from Playlist import Playlist
 from Song import Track
 
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
-    client_id = 'CLIENT_ID', 
-    client_secret = 'CLIENT_SECRET', 
-    redirect_uri = 'REDIRECT_URI',
-    username = 'USER_ID'))
+    client_id = '3807740e1a274c5185d6723967a00f5b', 
+    client_secret = '8718585c5b1f453689655c20034988ee', 
+    redirect_uri = 'http://localhost:8888/callback', 
+    scope = "playlist-modify-public",
+    username = '1245544016'))
 
 #create a list of all the ids of user's playlists
 #param list of playlist names
@@ -48,56 +49,6 @@ def get_song_set(playlist_id, index):
     for song_id in tracks['items']:
         track_ids.append(song_id['track']['id'])
     return track_ids
-
-#uses the playlist id and list of track objects
-#param id of playlist
-#param list of Track objects
-def sort_by_values(playlist_id, tracks):
-    user = sp.me()['id']
-    tracks.sort(key=lambda song: song.get_music_avg(), reverse=False)
-    for i in range(len(tracks)):
-        sp.user_playlist_reorder_tracks(user, playlist_id, tracks[i].get_index(), i)
-        increment_list(tracks[i].get_index(), tracks)
-
-#increments the value of each item if it is less than target value
-#param target value
-#param list
-def increment_list(val, list):
-    for i in list:
-        if(i.get_index() < val):
-            i.increment_index()
-
-#sorts by comparing each track key with the next several track keys and 
-#chooses the next track as the most similar in key
-#if the next keys are not in range of closeness then the next track stays in place
-#param id of playlist
-#param list of Track objects
-def sort_by_key(playlist_id, tracks):
-    user = sp.me()['id']
-
-    limit = 3                           #number of tracks ahead to compare to
-    if(len(tracks) > 100):              #if there are more than 100 tracks, the track will be compared
-        limit = 7                       #to next 7 tracks instead of 3
-
-    for i in range(len(tracks)-1):                  
-        curr_song = tracks[i]                         
-        j = 1
-        temp = []
-
-        while(i + j < len(tracks) and j <= limit): 
-            next_song = tracks[i+j]
-            compare_keys(temp, curr_song, next_song)
-            j += 1
-
-        low = min(temp)
-        print(low)
-        if min(temp) == 10:
-            low = 1
-        else:
-            low = temp.index(min(temp)) + 1
-
-        sp.user_playlist_reorder_tracks(user, playlist_id, low + i, i+1)
-
         
 #compares the current song key with the next song key
 def compare_keys(list, currSong, nextSong):
@@ -178,6 +129,64 @@ def key_val(curr, next, bl, br, t, tl, tr):
     else:
         return 10
 
+#sorts by comparing each track key with the next several track keys and 
+#chooses the next track as the most similar in key
+#if the next keys are not in range of closeness then the next track stays in place
+#param id of playlist
+#param list of sorted Track objects
+def sort_by_key(playlist_id, tracks):
+    limit = 3                           #number of tracks ahead to compare to
+    if(len(tracks) > 100):              #if there are more than 100 tracks, the track will be compared
+        limit = 7                       #to next 7 tracks instead of 3
+
+    for i in range(len(tracks)-1):                  
+        curr_song = tracks[i]                         
+        j = 1
+        temp = []
+
+        while(i + j < len(tracks) and j <= limit): 
+            next_song = tracks[i+j]
+            compare_keys(temp, curr_song, next_song)
+            j += 1
+
+        low = min(temp)
+        print(low)
+        if min(temp) == 10:
+            low = 1
+        else:
+            low = temp.index(min(temp)) + 1
+
+        track = tracks.pop(low + i)     #pops out the track with closest key
+        tracks.insert(i+1, track)       #inserts it as the next track
+
+    return tracks
+
+#uses the playlist id and list of track objects
+#sorts the list of songs by value then key
+#returns the sorted list
+#param id of playlist
+#param list of Track objects
+def sort_by_values(playlist_id, tracks):
+    tracks.sort(key=lambda song: song.get_music_avg(), reverse=False)
+    new_tracks = sort_by_key(playlist_id, tracks)
+    return new_tracks
+
+#increments the value of each item if it is less than target value
+#param target value
+#param list
+def increment_list(val, list):
+    for i in list:
+        if(i.get_index() < val):
+            i.increment_index()
+
+#reorders the sorted list to actual playlist
+#param playlist id
+#param sorted track list
+def sort(playlist_id, tracks):
+    user = sp.me()['id']
+    for i in range(len(tracks)):
+        sp.user_playlist_reorder_tracks(user, playlist_id, tracks[i].get_index(), i)
+        increment_list(tracks[i].get_index(), tracks)
 
 #sorts one playlist
 def sortOnePlaylist():
@@ -193,8 +202,9 @@ def sortOnePlaylist():
     offset = get_loop_offset(track_totals, playlist_number)                         #get the playlist offset
     tracks = get_tracks(playlist_id, offset)                                        #gets the list of Track objects
 
-    sort_by_values(playlist_id, tracks)                                             #sorts the playlist by value
-    sort_by_key(playlist_id, tracks)                                                #sorts the playlist by keys
+    sorted_tracks = sort_by_values(playlist_id, tracks)
+    sort(playlist_id, sorted_tracks)                                                #sorts the playlist by value
+    
 
 if __name__ == "__main__":
     sortOnePlaylist()
