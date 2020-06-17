@@ -28,5 +28,3 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
     redirect_uri = 'REDIRECT_URI',
     username = 'USER_ID'))
 ```
-
-# PerfectTransition

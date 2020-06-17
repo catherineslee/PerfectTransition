@@ -4,10 +4,10 @@ from Playlist import Playlist
 from Song import Track
 
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
-    client_id = '3807740e1a274c5185d6723967a00f5b', 
-    client_secret = '8718585c5b1f453689655c20034988ee', 
-    redirect_uri = 'http://localhost:8888/callback', 
-    username = '1245544016'))
+    client_id = 'CLIENT_ID', 
+    client_secret = 'CLIENT_SECRET', 
+    redirect_uri = 'REDIRECT_URI',
+    username = 'USER_ID'))
 
 #create a list of all the ids of user's playlists
 #param list of playlist names
