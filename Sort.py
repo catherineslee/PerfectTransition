@@ -7,6 +7,7 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
     client_id = 'CLIENT_ID', 
     client_secret = 'CLIENT_SECRET', 
     redirect_uri = 'REDIRECT_URI',
+    scope = "SCOPE",
     username = 'USER_ID'))
 
 #create a list of all the ids of user's playlists
