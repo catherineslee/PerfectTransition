@@ -19,8 +19,8 @@ To get started, install spotipy and create an app on https://developer.spotify.c
 
 **Without user authentication**
 ```bash
- import spotipy
- from spotipy.oauth2 import SpotifyClientCredentials
+import spotipy
+from spotipy.oauth2 import SpotifyClientCredentials
 
 client_credentials_manager = SpotifyClientCredentials(client_id = 'CLIENT_ID', 
 client_secret = 'CLIENT_SECRET')
