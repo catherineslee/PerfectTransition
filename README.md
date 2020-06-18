@@ -17,6 +17,17 @@ A full set of examples can be found in the [online documentation](https://spotip
 
 To get started, install spotipy and create an app on https://developer.spotify.com/dashboard/login. Add a redirect URI to the app and add your new CLIENT_ID, CLIENT_SECRET, REDIRECT_URI to your environment:
 
+**Without user authentication**
+```bash
+ import spotipy
+ from spotipy.oauth2 import SpotifyClientCredentials
+
+client_credentials_manager = SpotifyClientCredentials(client_id = 'CLIENT_ID', 
+client_secret = 'CLIENT_SECRET')
+sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+sp.trace = False
+```
+
 **With user authentication**
 ```bash
 import spotipy
