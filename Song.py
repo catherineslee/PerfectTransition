@@ -3,11 +3,13 @@ import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 
 class Track(object):
-    client_credentials_manager = SpotifyClientCredentials(client_id = '3807740e1a274c5185d6723967a00f5b', 
-    client_secret = '8718585c5b1f453689655c20034988ee')
+    client_credentials_manager = SpotifyClientCredentials(client_id = 'CLIENT_ID', 
+    client_secret = 'CLIENT_SECRET')
     sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
     sp.trace = False
+    
     id = ''
+    playlist_id = ''
     energy = 0.0
     dance = 0.0
     valence = 0.0
@@ -15,9 +17,11 @@ class Track(object):
     key = 0
     mode = 0
     index = 0
+    date = ''
 
-    def __init__(self, id):
+    def __init__(self, id, playlist_id):
         self.id = id
+        self.playlist_id = playlist_id
     
     def set_info(self, index):
         self.index = index
@@ -28,6 +32,7 @@ class Track(object):
         self.acoustic = track_info[0]['acousticness']
         self.key = track_info[0]['key']
         self.mode = track_info[0]['mode']
+        self.date = self.sp.playlist_tracks(self.playlist_id, offset = index)['items'][0]['added_at'] 
 
     def get_index(self):
         return self.index
@@ -41,7 +46,7 @@ class Track(object):
         e = (self.energy * 10)
         v = (self.valence * 10)
         a = (1-self.acoustic) * 10
-        return float('%.3f'%((d + e + v + a)/4))
+        return float('%.3f'%((e + v)/2))
     
     #if song is in minor key then A is appended
     #if song is in major keh then B is appended
@@ -52,3 +57,6 @@ class Track(object):
         else:
             val += 'B'
         return val
+
+    def get_date(self):
+        return self.date

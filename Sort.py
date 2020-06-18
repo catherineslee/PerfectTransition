@@ -4,11 +4,10 @@ from Playlist import Playlist
 from Song import Track
 
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
-    client_id = '3807740e1a274c5185d6723967a00f5b', 
-    client_secret = '8718585c5b1f453689655c20034988ee', 
-    redirect_uri = 'http://localhost:8888/callback', 
-    scope = "playlist-modify-public",
-    username = '1245544016'))
+    client_id = 'CLIENT_ID', 
+    client_secret = 'CLIENT_SECRET', 
+    redirect_uri = 'REDIRECT_URI',
+    username = 'USER_ID'))
 
 #create a list of all the ids of user's playlists
 #param list of playlist names
@@ -135,7 +134,7 @@ def key_val(curr, next, bl, br, t, tl, tr):
 #param id of playlist
 #param list of sorted Track objects
 def sort_by_key(playlist_id, tracks):
-    limit = 3                           #number of tracks ahead to compare to
+    limit = 4                           #number of tracks ahead to compare to
     if(len(tracks) > 100):              #if there are more than 100 tracks, the track will be compared
         limit = 7                       #to next 7 tracks instead of 3
 
@@ -144,7 +143,7 @@ def sort_by_key(playlist_id, tracks):
         j = 1
         temp = []
 
-        while(i + j < len(tracks) and j <= limit): 
+        while(i + j < len(tracks) and j < limit): 
             next_song = tracks[i+j]
             compare_keys(temp, curr_song, next_song)
             j += 1
@@ -171,6 +170,14 @@ def sort_by_values(playlist_id, tracks):
     new_tracks = sort_by_key(playlist_id, tracks)
     return new_tracks
 
+def reorder_by_date(playlist_id, tracks):
+    tracks.sort(key=lambda song: song.get_date(), reverse=False)
+    user = sp.me()['id']
+    for i in range(len(tracks)):
+        sp.user_playlist_reorder_tracks(user, playlist_id, tracks[i].get_index(), i)
+        increment_list(tracks[i].get_index(), tracks)
+    
+
 #increments the value of each item if it is less than target value
 #param target value
 #param list
@@ -182,14 +189,14 @@ def increment_list(val, list):
 #reorders the sorted list to actual playlist
 #param playlist id
 #param sorted track list
-def sort(playlist_id, tracks):
+def reorder(playlist_id, tracks):
     user = sp.me()['id']
     for i in range(len(tracks)):
         sp.user_playlist_reorder_tracks(user, playlist_id, tracks[i].get_index(), i)
         increment_list(tracks[i].get_index(), tracks)
 
 #sorts one playlist
-def sortOnePlaylist():
+def reorder_one_playlist_val_key():
     playlist_names = []                                                             #blank list of playlist names
     track_totals = []                                                               #blank list of track totals of each playlist
     ids = get_playlists(playlist_names, track_totals)                               #creates list of playlist ids  
@@ -202,9 +209,34 @@ def sortOnePlaylist():
     offset = get_loop_offset(track_totals, playlist_number)                         #get the playlist offset
     tracks = get_tracks(playlist_id, offset)                                        #gets the list of Track objects
 
-    sorted_tracks = sort_by_values(playlist_id, tracks)
-    sort(playlist_id, sorted_tracks)                                                #sorts the playlist by value
-    
+    sorted_tracks = sort_by_values(playlist_id, tracks)                            #creates a sorted list with value and key
+    reorder(playlist_id, sorted_tracks)                                            #reorders the playlist
+
+def reorder_one_playlist_date():
+    playlist_names = []                                                             #blank list of playlist names
+    track_totals = []                                                               #blank list of track totals of each playlist
+    ids = get_playlists(playlist_names, track_totals)                               #creates list of playlist ids  
+    for i in range(len(playlist_names)):                                            #prints playlist names in order
+        print(str(i + 1) + " : " + playlist_names[i])
+
+    playlist_number = int(input("Enter the playlist number you want sorted"))-1     #input which playlist number you want sorted 
+
+    playlist_id = ids[playlist_number]                                              #gets the id of playlist wanted
+    offset = get_loop_offset(track_totals, playlist_number)                         #get the playlist offset
+    tracks = get_tracks(playlist_id, offset)                                        #gets the list of Track objects
+    reorder_by_date(playlist_id, tracks)
+
+def main():
+    print("enter 1 to reorder by value and key")
+    print("enter 2 to reorder by date")
+    val = int(input(""))
+    if val == 1:
+        reorder_one_playlist_val_key()
+    elif val == 2:
+        reorder_one_playlist_date()
+    else:
+        print('try again')
+        main()
 
 if __name__ == "__main__":
-    sortOnePlaylist()
+    main()
