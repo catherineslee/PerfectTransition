@@ -11,9 +11,10 @@ class Track(object):
     id = ''
     playlist_id = ''
     energy = 0.0
-    dance = 0.0
     valence = 0.0
     acoustic = 0.0
+    speech = 0.0
+    bpm = 0.0
     key = 0
     mode = 0
     index = 0
@@ -27,9 +28,10 @@ class Track(object):
         self.index = index
         track_info = self.sp.audio_features(self.id)
         self.energy = track_info[0]['energy']
-        self.dance = track_info[0]['danceability']
         self.valence = track_info[0]['valence']
         self.acoustic = track_info[0]['acousticness']
+        self.speech = track_info[0]['speechiness']
+        self.bpm = track_info[0]['tempo']
         self.key = track_info[0]['key']
         self.mode = track_info[0]['mode']
         self.date = self.sp.playlist_tracks(self.playlist_id, offset = index)['items'][0]['added_at'] 
@@ -42,11 +44,12 @@ class Track(object):
 
     #gets the average values of dance, energy, valence, and acousticness
     def get_music_avg(self):
-        d = (self.dance * 10)
-        e = (self.energy * 10)
-        v = (self.valence * 10)
+        e = self.energy * 10 * 1.2
+        v = self.valence * 10 * 1.5
         a = (1-self.acoustic) * 10
-        return float('%.3f'%((e + v)/2))
+        s = self.speech * 10
+        t = self.bpm / 10
+        return float('%.3f'%((e + v + a + s + t)/5))
     
     #if song is in minor key then A is appended
     #if song is in major keh then B is appended

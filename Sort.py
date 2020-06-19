@@ -150,11 +150,12 @@ def sort_by_key(playlist_id, tracks):
             j += 1
 
         low = min(temp)
-        print(low)
         if min(temp) == 10:
             low = 1
         else:
             low = temp.index(min(temp)) + 1
+        #print(low)
+        print(curr_song.get_music_avg())
 
         track = tracks.pop(low + i)     #pops out the track with closest key
         tracks.insert(i+1, track)       #inserts it as the next track
@@ -203,8 +204,8 @@ def reorder_one_playlist_val_key():
     ids = get_playlists(playlist_names, track_totals)                               #creates list of playlist ids  
     for i in range(len(playlist_names)):                                            #prints playlist names in order
         print(str(i + 1) + " : " + playlist_names[i])
-
-    playlist_number = int(input("Enter the playlist number you want sorted"))-1     #input which playlist number you want sorted 
+    print("Enter the playlist number you want sorted")
+    playlist_number = int(input(""))-1     #input which playlist number you want sorted 
 
     playlist_id = ids[playlist_number]                                              #gets the id of playlist wanted
     offset = get_loop_offset(track_totals, playlist_number)                         #get the playlist offset
@@ -220,7 +221,7 @@ def reorder_one_playlist_date():
     for i in range(len(playlist_names)):                                            #prints playlist names in order
         print(str(i + 1) + " : " + playlist_names[i])
 
-    playlist_number = int(input("Enter the playlist number you want sorted"))-1     #input which playlist number you want sorted 
+    playlist_number = int(input("Enter the playlist number you want sorted:"))-1     #input which playlist number you want sorted 
 
     playlist_id = ids[playlist_number]                                              #gets the id of playlist wanted
     offset = get_loop_offset(track_totals, playlist_number)                         #get the playlist offset
@@ -228,8 +229,9 @@ def reorder_one_playlist_date():
     reorder_by_date(playlist_id, tracks)
 
 def main():
-    print("enter 1 to reorder by value and key")
-    print("enter 2 to reorder by date")
+    print("1: reorder by speechiness")
+    print("2: reorder by date")
+    print("Enter the number you want for you playlist:")
     val = int(input(""))
     if val == 1:
         reorder_one_playlist_val_key()
